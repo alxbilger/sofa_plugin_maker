@@ -23,8 +23,8 @@ def main():
     path = sys.argv[2]
 
     # Check if string contains only allowed characters (alphanumeric, hyphen, and underscore)
-    if not re.match(r'^[a-zA-Z0-9\-_]+$', plugin_name):
-        print("Error: Plugin name can only contain letters, numbers, hyphens (-) and underscores (_)")
+    if not re.match(r'^[a-zA-Z0-9\-_.]+$', plugin_name):
+        print("Error: Plugin name can only contain letters, numbers, hyphens (-), underscores (_) and dot (.) characters.")
         sys.exit(1)
 
     # Check if the provided path exists
@@ -43,6 +43,8 @@ def main():
     print(f"Path '{path}' is valid")
 
     upper_plugin_name = plugin_name.upper()
+    namespace = plugin_name.lower().replace("-", "").replace("_", "").replace(".", "")
+    plugin_symbol = upper_plugin_name.replace("-", "_").replace(".", "_")
 
     # Create the main plugin folder
     os.makedirs(plugin_path)
@@ -76,8 +78,8 @@ sofa_create_package_with_targets(
     RELOCATABLE "plugins"
     )
     
-cmake_dependent_option({upper_plugin_name}_BUILD_TESTS "Compile the automatic tests" ON "SOFA_BUILD_TESTS OR NOT DEFINED SOFA_BUILD_TESTS" OFF)
-if({upper_plugin_name}_BUILD_TESTS)
+cmake_dependent_option({plugin_symbol}_BUILD_TESTS "Compile the automatic tests" ON "SOFA_BUILD_TESTS OR NOT DEFINED SOFA_BUILD_TESTS" OFF)
+if({plugin_symbol}_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
@@ -335,11 +337,11 @@ def createScene(root_node):
     init_h_content = f"""#pragma once
 #include <{plugin_name}/config.h>
 
-namespace {plugin_name}
+namespace {namespace}
 {{
 
 /** Initialize the {plugin_name} plugin */
-void {upper_plugin_name}_API initializePlugin();
+void {plugin_symbol}_API initializePlugin();
 
 }}
 """
@@ -349,10 +351,11 @@ void {upper_plugin_name}_API initializePlugin();
     init_cpp_content = f"""#include <{plugin_name}/init.h>
 #include <sofa/core/ObjectFactory.h>
 
-namespace {plugin_name}
+namespace {namespace}
 {{
 
-void initializePlugin() {{
+void initializePlugin() 
+{{
     static bool first = true;
     if (first) {{
         first = false;
@@ -360,27 +363,32 @@ void initializePlugin() {{
     }}
 }}
 
-
 }}
 
-extern "C" {{
-    {upper_plugin_name}_API void initExternalModule() {{
-        {plugin_name}::initializePlugin();
+extern "C" 
+{{
+    {plugin_symbol}_API void initExternalModule() 
+    {{
+        {namespace}::initializePlugin();
     }}
 
-    {upper_plugin_name}_API const char* getModuleName() {{
-        return {plugin_name}::MODULE_NAME;
+    {plugin_symbol}_API const char* getModuleName() 
+    {{
+        return {namespace}::MODULE_NAME;
     }}
 
-    {upper_plugin_name}_API const char* getModuleVersion() {{
-        return {plugin_name}::MODULE_VERSION;
+    {plugin_symbol}_API const char* getModuleVersion() 
+    {{
+        return {namespace}::MODULE_VERSION;
     }}
 
-    {upper_plugin_name}_API const char* getModuleLicense() {{
+    {plugin_symbol}_API const char* getModuleLicense() 
+    {{
         return "LGPL";
     }}
 
-    {upper_plugin_name}_API const char* getModuleDescription() {{
+    {plugin_symbol}_API const char* getModuleDescription() 
+    {{
         return "SOFA plugin for {plugin_name}";
     }}
 }}
@@ -391,14 +399,14 @@ extern "C" {{
     config_h_content = f"""#pragma once
 #include <sofa/config.h>
 
-#ifdef SOFA_BUILD_{upper_plugin_name}
+#ifdef SOFA_BUILD_{plugin_symbol}
 #  define SOFA_TARGET @PROJECT_NAME@
-#  define {upper_plugin_name}_API SOFA_EXPORT_DYNAMIC_LIBRARY
+#  define {plugin_symbol}_API SOFA_EXPORT_DYNAMIC_LIBRARY
 #else
-#  define {upper_plugin_name}_API SOFA_IMPORT_DYNAMIC_LIBRARY
+#  define {plugin_symbol}_API SOFA_IMPORT_DYNAMIC_LIBRARY
 #endif
 
-namespace {plugin_name}
+namespace {namespace}
 {{
     constexpr const char* MODULE_NAME = "@PROJECT_NAME@";
     constexpr const char* MODULE_VERSION = "@PROJECT_VERSION@";
