@@ -1,0 +1,40 @@
+name: Generate Plugin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-plugin:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Generate plugin
+      run: python plugin_maker.py ExamplePlugin ./
+    
+    - name: Get latest commit hash
+      id: get-hash
+      run: echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+    
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+    
+    - name: Create and switch to new branch
+      run: git checkout -b generated
+    
+    - name: Add and commit changes
+      run: |
+        git add ExamplePlugin/
+        git commit -m "Generated plugin from commit ${{ steps.get-hash.outputs.hash }}"
+    
+    - name: Push changes
+      run: git push -f origin generated
