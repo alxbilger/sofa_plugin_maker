@@ -9,39 +9,47 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # This gives permission to push to the repository
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}  # Use the built-in token
         fetch-depth: 0  # Fetch all history to ensure we can get the commit hash
-
+    
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-
+    
     - name: Generate plugin
       run: python plugin_maker.py ExamplePlugin ./
-
+    
     - name: Get latest commit hash
       id: get-hash
       run: echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
+    
     - name: Configure Git
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-    - name: Create and switch to new branch
-      run: git checkout -b generated
-
-    - name: Add and commit changes
+    
+    - name: Create clean branch with only ExamplePlugin
       run: |
-        git add ExamplePlugin/
+        # Create and checkout an orphan branch (no history)
+        git checkout --orphan generated
+        
+        # Remove everything from git tracking
+        git rm -rf .
+        
+        # Move ExamplePlugin contents to root
+        mv ExamplePlugin/* .
+        rm -rf ExamplePlugin
+        
+        # Add and commit only the plugin contents
+        git add .
         git commit -m "Generated plugin from commit ${{ steps.get-hash.outputs.hash }}"
-
+    
     - name: Push changes
       run: git push -f origin generated
       env:
