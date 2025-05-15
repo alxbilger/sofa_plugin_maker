@@ -41,22 +41,15 @@ jobs:
         
         echo "Remove everything from git tracking"
         git rm -rf .
-        
-        echo "Content"
-        find .
-        
+                
         echo "Move ExamplePlugin contents to root"
-        mv ExamplePlugin/{.*,*} .
+        mv ExamplePlugin/* .
         rm -rf ExamplePlugin
-        
-        echo "Content"
-        find .
         
         echo "Create empty file to keep the reference folder non-empty and add it to git"
         touch regression/references/.gitkeep
         
         echo "Add and commit only the plugin contents"
-        git status
         git add .
         git status
         git commit -m "Generated plugin from commit ${{ steps.get-hash.outputs.hash }}"
