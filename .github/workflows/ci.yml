@@ -36,19 +36,21 @@ jobs:
     
     - name: Create clean branch with only ExamplePlugin
       run: |
-        # Create and checkout an orphan branch (no history)
+        echo "Create and checkout an orphan branch (no history)"
         git checkout --orphan generated
         
-        # Remove everything from git tracking
+        echo "Remove everything from git tracking"
         git rm -rf .
         
-        # Move ExamplePlugin contents to root
+        echo "Move ExamplePlugin contents to root"
         mv ExamplePlugin/* .
         rm -rf ExamplePlugin
         find .
         
-        # Add and commit only the plugin contents
+        echo "Add and commit only the plugin contents"
+        git status
         git add .
+        git status
         git commit -m "Generated plugin from commit ${{ steps.get-hash.outputs.hash }}"
     
     - name: Push changes
