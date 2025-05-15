@@ -45,6 +45,7 @@ jobs:
         # Move ExamplePlugin contents to root
         mv ExamplePlugin/* .
         rm -rf ExamplePlugin
+        find .
         
         # Add and commit only the plugin contents
         git add .
