@@ -47,6 +47,9 @@ jobs:
         rm -rf ExamplePlugin
         find .
         
+        echo "Create empty file to keep the reference folder non-empty and add it to git"
+        touch regression/references/.gitkeep
+        
         echo "Add and commit only the plugin contents"
         git status
         git add .
