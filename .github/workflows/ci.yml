@@ -46,7 +46,7 @@ jobs:
         find .
         
         echo "Move ExamplePlugin contents to root"
-        mv ExamplePlugin/* .
+        mv ExamplePlugin/{.*,*} .
         rm -rf ExamplePlugin
         
         echo "Content"
