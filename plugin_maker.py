@@ -296,6 +296,10 @@ jobs:
 """
     create_file(os.path.join(xml_path, "example.scn"), xml_example_content)
 
+    python_path = os.path.join(examples_path, "python")
+    os.makedirs(python_path)
+    print(f"Created folder: {python_path}")
+
     python_example_content = f"""import Sofa
 
 def createScene(root_node):
@@ -308,11 +312,7 @@ def createScene(root_node):
     plugins.addObject('RequiredPlugin', name="{plugin_name}")
 
 """
-    create_file(os.path.join(examples_path, "example.py"), python_example_content)
-
-    python_path = os.path.join(examples_path, "python")
-    os.makedirs(python_path)
-    print(f"Created folder: {python_path}")
+    create_file(os.path.join(python_path, "example.py"), python_example_content)
 
     # Create regression folder
     regression_path = os.path.join(plugin_path, "regression")
